@@ -1,3 +1,5 @@
+   ![CI](https://github.com/anubhavsri933/rate-limiter-gateway/actions/workflows/ci.yml/badge.svg)
+   
 # Rate-Limited API Gateway
 
 A small API gateway that enforces per-client, per-tier rate limits using
