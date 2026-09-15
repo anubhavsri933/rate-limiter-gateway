@@ -1,0 +1,40 @@
+services:
+  gateway:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - GATEWAY_DB_PATH=/data/gateway.db
+      - GATEWAY_ALGORITHM=token_bucket
+    volumes:
+      # Named volume so the SQLite file (and all client/request data)
+      # persists across `docker compose down` / rebuilds. Without
+      # this, every container restart would wipe the database.
+      - gateway_data:/data
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+volumes:
+  gateway_data:
+
+# -----------------------------------------------------------------
+# OPTIONAL EXTENSION (not implemented in this project, documented
+# here as a deliberate next step you can mention in interviews):
+#
+# To swap SQLite for PostgreSQL, you would:
+#   1. Add a `postgres:16` service here with its own named volume
+#   2. Replace app/db.py's sqlite3 calls with psycopg2/asyncpg,
+#      keeping the same function signatures (create_client,
+#      log_request, top_abusers, etc.) so app/gateway.py and
+#      app/main.py don't need to change at all
+#   3. Swap datetime('now') / substr() calls in schema.sql and the
+#      analytics queries for Postgres equivalents (NOW(),
+#      DATE_TRUNC('hour', requested_at))
+#
+# This is intentionally left as documented future work rather than
+# untested code, since it can't be verified against a live Postgres
+# instance in this environment.
+# -----------------------------------------------------------------
